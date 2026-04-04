@@ -1,0 +1,17 @@
+server:
+ port: 8006
+ 
+spring:
+  application:
+    name: Parking-Lot
+  datasource:
+    url: jdbc:mysql://localhost:3306/demoDb
+    driverClassName: com.mysql.cj.jdbc.Driver
+    username: Prajwal
+    password: pks
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    
+    
+
+       
