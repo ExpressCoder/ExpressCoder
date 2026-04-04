@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @ControllerAdvice
-public class ParkingExceptionHandler extends Exception {
+public class ParkingExceptionHandler {
 
 	
 	@ExceptionHandler(ParkingException.class)
