@@ -86,4 +86,9 @@ public class ParkingLotServiceImpl implements ParkingLotService {
 		return vehicleDetails.entrySet().stream().map(e->e.getValue()).collect(Collectors.toList());
 	}
 
+	@Override
+	public List<Map<String, Object>> getBasementStatus() {
+		return ParkingLotUtil.getBasementStatus();
+	}
+
 }

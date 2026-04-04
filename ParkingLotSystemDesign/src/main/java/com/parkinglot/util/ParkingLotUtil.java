@@ -1,7 +1,9 @@
 package com.parkinglot.util;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.parkinglot.dto.VehicleType;
@@ -9,25 +11,22 @@ import com.parkinglot.exception.ParkingException;
 
 public class ParkingLotUtil {
 	
-	public static final long TOTAL_AVAILABLE_LOTS = 3;
+	public static final int CAPACITY_PER_BASEMENT = 250;
+	public static final int TOTAL_BASEMENTS = 4;
+	public static final long TOTAL_AVAILABLE_LOTS = TOTAL_BASEMENTS * CAPACITY_PER_BASEMENT;
 	
-	public static final long TOTAL_AVAILABLE_CAR_LOTS = 1;
-	public static final long TOTAL_AVAILABLE_BIKE_LOTS = 2;
+	public static final long TOTAL_AVAILABLE_CAR_LOTS = 500;
+	public static final long TOTAL_AVAILABLE_BIKE_LOTS = 500;
 	
 	private static Map<Integer,Double> parkingPriceMap;
 	private static Map<String,Integer> basementMap = new HashMap<>();
 	
-	private static final int MAX_CAPACITY_PER_BASEMENT_B1 = 150;
-	private static final int MAX_CAPACITY_PER_BASEMENT_B2 = 175;
-	private static final int MAX_CAPACITY_PER_BASEMENT_B3 = 200;
-	private static final int MAX_CAPACITY_PER_BASEMENT_B4 = 225;
-	
 	private static final String[] BASEMENTS = {"B1", "B2", "B3", "B4"};
 	private static final int[] BASEMENT_CAPACITIES = {
-		MAX_CAPACITY_PER_BASEMENT_B1,
-		MAX_CAPACITY_PER_BASEMENT_B2,
-		MAX_CAPACITY_PER_BASEMENT_B3,
-		MAX_CAPACITY_PER_BASEMENT_B4
+		CAPACITY_PER_BASEMENT,
+		CAPACITY_PER_BASEMENT,
+		CAPACITY_PER_BASEMENT,
+		CAPACITY_PER_BASEMENT
 	};
 	
 	private static int carLotCounter;
@@ -114,7 +113,19 @@ public class ParkingLotUtil {
 		}
 		return "No Basement Available";
 	}
-	
 
+	public static List<Map<String, Object>> getBasementStatus() {
+		List<Map<String, Object>> status = new ArrayList<>();
+		for (int i = 0; i < BASEMENTS.length; i++) {
+			Map<String, Object> info = new LinkedHashMap<>();
+			int occupied = basementMap.getOrDefault(BASEMENTS[i], 0);
+			info.put("name", BASEMENTS[i]);
+			info.put("capacity", BASEMENT_CAPACITIES[i]);
+			info.put("occupied", occupied);
+			info.put("available", BASEMENT_CAPACITIES[i] - occupied);
+			status.add(info);
+		}
+		return status;
+	}
 
 }

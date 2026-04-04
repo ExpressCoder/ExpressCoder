@@ -305,6 +305,80 @@
             font-size: 1.1rem;
         }
 
+        .basement-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-top: 12px;
+        }
+
+        .basement-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+            border: 2px solid #e0e0e0;
+            transition: border-color 0.2s;
+        }
+
+        .basement-card.has-space {
+            border-color: #4caf50;
+        }
+
+        .basement-card.full {
+            border-color: #d93025;
+            background: #fef2f2;
+        }
+
+        .basement-card .basement-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1a73e8;
+            margin-bottom: 8px;
+        }
+
+        .basement-card .basement-capacity {
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .basement-bar {
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .basement-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .basement-bar-fill.low {
+            background: #4caf50;
+        }
+
+        .basement-bar-fill.medium {
+            background: #ff9800;
+        }
+
+        .basement-bar-fill.high {
+            background: #d93025;
+        }
+
+        .basement-available {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 4px 0;
+        }
+
+        .basement-available.green { color: #4caf50; }
+        .basement-available.orange { color: #ff9800; }
+        .basement-available.red { color: #d93025; }
+
         @media (max-width: 768px) {
             .container {
                 grid-template-columns: 1fr;
@@ -312,6 +386,9 @@
             .stats-bar {
                 flex-wrap: wrap;
                 gap: 12px;
+            }
+            .basement-grid {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
     </style>
@@ -395,6 +472,12 @@
         </div>
 
         <div class="card full-width">
+            <h2><span class="icon">&#127970;</span> Basement Status</h2>
+            <div class="basement-grid" id="basementGrid">
+            </div>
+        </div>
+
+        <div class="card full-width">
             <h2><span class="icon">&#128203;</span> Vehicles Currently Parked</h2>
             <table id="vehicleTable">
                 <thead>
@@ -432,9 +515,10 @@
 
         async function refreshStats() {
             try {
-                const [totalRes, vehiclesRes] = await Promise.all([
+                const [totalRes, vehiclesRes, basementRes] = await Promise.all([
                     fetch(API_BASE + '/availableLots'),
-                    fetch(API_BASE + '/listOfVehiclesInLot')
+                    fetch(API_BASE + '/listOfVehiclesInLot'),
+                    fetch(API_BASE + '/basementStatus')
                 ]);
                 const total = await totalRes.json();
                 const vehicles = await vehiclesRes.json();
@@ -467,9 +551,39 @@
                 }
 
                 refreshVehicleTable(vehicles);
+
+                if (basementRes.ok) {
+                    const basements = await basementRes.json();
+                    refreshBasementStatus(basements);
+                }
             } catch (err) {
                 console.error('Failed to refresh stats:', err);
             }
+        }
+
+        function refreshBasementStatus(basements) {
+            const grid = document.getElementById('basementGrid');
+            grid.innerHTML = basements.map(b => {
+                const pct = (b.occupied / b.capacity) * 100;
+                let barClass = 'low';
+                let numClass = 'green';
+                let cardClass = 'has-space';
+                if (pct >= 80) { barClass = 'high'; numClass = 'red'; }
+                else if (pct >= 50) { barClass = 'medium'; numClass = 'orange'; }
+                if (b.available === 0) { cardClass = 'full'; }
+                return `
+                    <div class="basement-card ${cardClass}">
+                        <div class="basement-name">${b.name}</div>
+                        <div class="basement-capacity">Capacity: ${b.capacity}</div>
+                        <div class="basement-available ${numClass}">${b.available}</div>
+                        <div class="basement-capacity">Available</div>
+                        <div class="basement-bar">
+                            <div class="basement-bar-fill ${barClass}" style="width: ${pct}%"></div>
+                        </div>
+                        <div class="basement-capacity" style="margin-top:4px">${b.occupied} / ${b.capacity} occupied</div>
+                    </div>
+                `;
+            }).join('');
         }
 
         function refreshVehicleTable(vehicles) {
