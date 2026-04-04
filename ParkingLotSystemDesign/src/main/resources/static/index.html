@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parking Lot Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            color: #333;
+            min-height: 100vh;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1a73e8, #0d47a1);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        header h1 {
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        header p {
+            text-align: center;
+            opacity: 0.85;
+            margin-top: 5px;
+            font-size: 0.95rem;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            padding: 20px;
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 12px 24px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            min-width: 130px;
+        }
+
+        .stat-card .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1a73e8;
+        }
+
+        .stat-card .stat-label {
+            font-size: 0.8rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 24px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        }
+
+        .card h2 {
+            font-size: 1.15rem;
+            margin-bottom: 16px;
+            color: #1a73e8;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card h2 .icon {
+            font-size: 1.3rem;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1.5px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #1a73e8;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: #1a73e8;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1557b0;
+        }
+
+        .btn-danger {
+            background: #d93025;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #b71c1c;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+
+        th {
+            background: #f0f4ff;
+            padding: 10px 14px;
+            text-align: left;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #555;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        td {
+            padding: 10px 14px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 0.9rem;
+        }
+
+        tr:hover td {
+            background: #f8f9ff;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+
+        .badge-car {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .badge-bike {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .exit-btn {
+            padding: 5px 14px;
+            border: none;
+            border-radius: 6px;
+            background: #d93025;
+            color: white;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .exit-btn:hover {
+            background: #b71c1c;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 14px 20px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 500;
+            font-size: 0.9rem;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            max-width: 400px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast-success {
+            background: #1b5e20;
+        }
+
+        .toast-error {
+            background: #b71c1c;
+        }
+
+        .toast-info {
+            background: #0d47a1;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: #999;
+            font-size: 0.95rem;
+        }
+
+        .exit-result {
+            margin-top: 16px;
+            padding: 16px;
+            background: #f0f4ff;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .exit-result h3 {
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+            color: #1a73e8;
+        }
+
+        .exit-result .detail {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid #e0e8f5;
+            font-size: 0.88rem;
+        }
+
+        .exit-result .detail:last-child {
+            border-bottom: none;
+        }
+
+        .exit-result .detail .label {
+            color: #666;
+        }
+
+        .exit-result .detail .value {
+            font-weight: 600;
+        }
+
+        .price-highlight {
+            color: #1b5e20;
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            .stats-bar {
+                flex-wrap: wrap;
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Parking Lot Management System</h1>
+        <p>Manage vehicle parking, exits, and availability</p>
+    </header>
+
+    <div class="stats-bar">
+        <div class="stat-card">
+            <div class="stat-value" id="totalLots">-</div>
+            <div class="stat-label">Total Lots</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="carLots">-</div>
+            <div class="stat-label">Car Lots Free</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="bikeLots">-</div>
+            <div class="stat-label">Bike Lots Free</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="parkedCount">-</div>
+            <div class="stat-label">Vehicles Parked</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <h2><span class="icon">&#128663;</span> Park a Vehicle</h2>
+            <form id="parkForm">
+                <div class="form-group">
+                    <label for="vehicleType">Vehicle Type</label>
+                    <select id="vehicleType" required>
+                        <option value="CAR">Car</option>
+                        <option value="BIKE">Bike</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="registrationNo">Registration Number</label>
+                    <input type="text" id="registrationNo" placeholder="e.g. KA01AB1234" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Park Vehicle</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2><span class="icon">&#128682;</span> Exit Parking</h2>
+            <form id="exitForm">
+                <div class="form-group">
+                    <label for="exitRegNo">Registration Number</label>
+                    <input type="text" id="exitRegNo" placeholder="e.g. KA01AB1234" required>
+                </div>
+                <button type="submit" class="btn btn-danger">Exit Vehicle</button>
+            </form>
+            <div class="exit-result" id="exitResult">
+                <h3>Exit Receipt</h3>
+                <div class="detail">
+                    <span class="label">Registration No</span>
+                    <span class="value" id="receiptRegNo"></span>
+                </div>
+                <div class="detail">
+                    <span class="label">Vehicle Type</span>
+                    <span class="value" id="receiptType"></span>
+                </div>
+                <div class="detail">
+                    <span class="label">Entered At</span>
+                    <span class="value" id="receiptEntered"></span>
+                </div>
+                <div class="detail">
+                    <span class="label">Exited At</span>
+                    <span class="value" id="receiptExited"></span>
+                </div>
+                <div class="detail">
+                    <span class="label">Price</span>
+                    <span class="value price-highlight" id="receiptPrice"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card full-width">
+            <h2><span class="icon">&#128203;</span> Vehicles Currently Parked</h2>
+            <table id="vehicleTable">
+                <thead>
+                    <tr>
+                        <th>Registration No</th>
+                        <th>Vehicle Type</th>
+                        <th>Entered At</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="vehicleTableBody">
+                </tbody>
+            </table>
+            <div class="empty-state" id="emptyState">No vehicles currently parked</div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const API_BASE = '/parkingLot';
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast toast-' + type + ' show';
+            setTimeout(() => toast.classList.remove('show'), 3500);
+        }
+
+        function formatDateTime(dateStr) {
+            if (!dateStr) return '-';
+            const date = new Date(dateStr);
+            return date.toLocaleString();
+        }
+
+        async function refreshStats() {
+            try {
+                const [totalRes, vehiclesRes] = await Promise.all([
+                    fetch(API_BASE + '/availableLots'),
+                    fetch(API_BASE + '/listOfVehiclesInLot')
+                ]);
+                const total = await totalRes.json();
+                const vehicles = await vehiclesRes.json();
+
+                document.getElementById('totalLots').textContent = total;
+                document.getElementById('parkedCount').textContent = vehicles.length;
+
+                try {
+                    const carRes = await fetch(API_BASE + '/remainingLots?vehicleType=CAR');
+                    if (carRes.ok) {
+                        const carLots = await carRes.json();
+                        document.getElementById('carLots').textContent = carLots;
+                    } else {
+                        document.getElementById('carLots').textContent = '0';
+                    }
+                } catch {
+                    document.getElementById('carLots').textContent = '0';
+                }
+
+                try {
+                    const bikeRes = await fetch(API_BASE + '/remainingLots?vehicleType=BIKE');
+                    if (bikeRes.ok) {
+                        const bikeLots = await bikeRes.json();
+                        document.getElementById('bikeLots').textContent = bikeLots;
+                    } else {
+                        document.getElementById('bikeLots').textContent = '0';
+                    }
+                } catch {
+                    document.getElementById('bikeLots').textContent = '0';
+                }
+
+                refreshVehicleTable(vehicles);
+            } catch (err) {
+                console.error('Failed to refresh stats:', err);
+            }
+        }
+
+        function refreshVehicleTable(vehicles) {
+            const tbody = document.getElementById('vehicleTableBody');
+            const emptyState = document.getElementById('emptyState');
+
+            if (vehicles.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            tbody.innerHTML = vehicles.map(v => `
+                <tr>
+                    <td><strong>${v.registrationNo}</strong></td>
+                    <td><span class="badge badge-${v.vehicleType.toLowerCase()}">${v.vehicleType}</span></td>
+                    <td>${formatDateTime(v.enteredDateTime)}</td>
+                    <td><button class="exit-btn" onclick="exitVehicle('${v.registrationNo}')">Exit</button></td>
+                </tr>
+            `).join('');
+        }
+
+        document.getElementById('parkForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const vehicleType = document.getElementById('vehicleType').value;
+            const registrationNo = document.getElementById('registrationNo').value.trim().toUpperCase();
+
+            if (!registrationNo) {
+                showToast('Please enter a registration number', 'error');
+                return;
+            }
+
+            try {
+                const res = await fetch(API_BASE + '/doParking', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ vehicleType, registrationNo })
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    showToast(`${registrationNo} parked! ${data.basementNo}`, 'success');
+                    document.getElementById('registrationNo').value = '';
+                    refreshStats();
+                } else {
+                    const errMsg = await res.text();
+                    showToast(errMsg || 'Failed to park vehicle', 'error');
+                }
+            } catch (err) {
+                showToast('Network error. Is the server running?', 'error');
+            }
+        });
+
+        document.getElementById('exitForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const regNo = document.getElementById('exitRegNo').value.trim().toUpperCase();
+            if (!regNo) {
+                showToast('Please enter a registration number', 'error');
+                return;
+            }
+            await exitVehicle(regNo);
+        });
+
+        async function exitVehicle(registrationNo) {
+            try {
+                const res = await fetch(API_BASE + '/exitParking/' + registrationNo);
+
+                if (res.ok) {
+                    const data = await res.json();
+                    document.getElementById('receiptRegNo').textContent = data.registrationNo;
+                    document.getElementById('receiptType').textContent = data.vehicleType;
+                    document.getElementById('receiptEntered').textContent = formatDateTime(data.enteredTime);
+                    document.getElementById('receiptExited').textContent = formatDateTime(data.exitTime);
+                    document.getElementById('receiptPrice').textContent = '\u20B9 ' + (data.price != null ? data.price.toFixed(2) : '0.00');
+
+                    document.getElementById('exitResult').style.display = 'block';
+                    document.getElementById('exitRegNo').value = '';
+                    showToast(`${registrationNo} exited. Charge: \u20B9${data.price != null ? data.price.toFixed(2) : '0.00'}`, 'info');
+                    refreshStats();
+                } else {
+                    const errMsg = await res.text();
+                    showToast(errMsg || 'Vehicle not found', 'error');
+                }
+            } catch (err) {
+                showToast('Network error. Is the server running?', 'error');
+            }
+        }
+
+        // Initial load
+        refreshStats();
+        // Auto-refresh every 10 seconds
+        setInterval(refreshStats, 10000);
+    </script>
+</body>
+</html>
