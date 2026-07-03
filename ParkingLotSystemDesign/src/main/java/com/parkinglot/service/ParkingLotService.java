@@ -18,5 +18,9 @@ public interface ParkingLotService {
 	long getRemainingLots(VehicleType vehicleType) throws ParkingException;
 	
 	List<VehicleRequest> getVehiclesFromLot();
+	
+	long getAvailableCapacityByFloor(int floorNumber);
+	
+	long getCurrentOccupancyByFloor(int floorNumber);
 
 }

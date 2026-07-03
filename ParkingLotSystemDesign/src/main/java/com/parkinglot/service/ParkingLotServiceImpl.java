@@ -2,16 +2,15 @@ package com.parkinglot.service;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.parkinglot.dto.Floor;
 import com.parkinglot.dto.VehicleRequest;
 import com.parkinglot.dto.VehicleResponse;
 import com.parkinglot.dto.VehicleType;
@@ -29,7 +28,7 @@ public class ParkingLotServiceImpl implements ParkingLotService {
 
 	@Override
 	public long getTotalAvailableLots() {
-		return ParkingLotUtil.TOTAL_AVAILABLE_LOTS;
+		return ParkingLotUtil.getTotalAvailableLots();
 	}
 
 	@Override
@@ -41,16 +40,23 @@ public class ParkingLotServiceImpl implements ParkingLotService {
 	public VehicleResponse enterToParkingLot(VehicleRequest vehicleRequest) throws ParkingException {
 		if(vehicleDetails.get(vehicleRequest.getRegistrationNo()) != null)
 			throw new ParkingException("Vehicle Already in Parking Lot:"+vehicleRequest.getRegistrationNo());
-		if(getRemainingLots(vehicleRequest.getVehicleType()) > 0) {
+		
+		Floor availableFloor = ParkingLotUtil.getAvailableFloor(vehicleRequest.getVehicleType());
+		
+		if(availableFloor != null) {
 			LocalDateTime enteredTime = LocalDateTime.now();
 			vehicleRequest.setEnteredDateTime(enteredTime);
+			vehicleRequest.setFloor(availableFloor);
 			vehicleDetails.put(vehicleRequest.getRegistrationNo(), vehicleRequest);
+			
+			ParkingLotUtil.incrementFloorOccupancy(availableFloor);
+			
 			VehicleResponse vehicleResponse = new VehicleResponse();
 			vehicleResponse.setEnteredTime(vehicleRequest.getEnteredDateTime());
 			vehicleResponse.setVehicleType(vehicleRequest.getVehicleType());
 			vehicleResponse.setRegistrationNo(vehicleRequest.getRegistrationNo());
 			vehicleResponse.setTokenId(UUID.randomUUID().toString());
-			vehicleResponse.setBasementNo("Vehicle Parked in "+ParkingLotUtil.getAvailableBasement());
+			vehicleResponse.setBasementNo("Vehicle Parked in Floor " + availableFloor.getFloorNumber());
 			return vehicleResponse;
 		}
 		return null;
@@ -66,7 +72,9 @@ public class ParkingLotServiceImpl implements ParkingLotService {
 			long hoursDifference = ChronoUnit.HOURS.between(exitTime, vehicleRequest.getEnteredDateTime());
 			hoursDifference = 1;
 			Double price = ParkingLotUtil.getParkingPrice(hoursDifference);
-			ParkingLotUtil.decrementLotCounter(vehicleRequest.getVehicleType());
+			
+			ParkingLotUtil.decrementFloorOccupancy(vehicleRequest.getFloor());
+			
 			vehicleResponse = new VehicleResponse();
 			vehicleResponse.setEnteredTime(vehicleRequest.getEnteredDateTime());
 			vehicleResponse.setVehicleType(vehicleRequest.getVehicleType());
@@ -74,7 +82,6 @@ public class ParkingLotServiceImpl implements ParkingLotService {
 			vehicleResponse.setExitTime(exitTime);
 			vehicleResponse.setPrice(price);
 			vehicleDetails.remove(registrationNo);
-			//				vehicleResponse.setTokenId(UUID.randomUUID().toString());
 		} else {
 			throw new ParkingException("Registration Details Not Found:"+registrationNo);
 		}
@@ -85,6 +92,16 @@ public class ParkingLotServiceImpl implements ParkingLotService {
 	@Override
 	public List<VehicleRequest> getVehiclesFromLot() {
 		return vehicleDetails.entrySet().stream().map(e->e.getValue()).collect(Collectors.toList());
+	}
+	
+	@Override
+	public long getAvailableCapacityByFloor(int floorNumber) {
+		return ParkingLotUtil.getAvailableCapacityByFloor(floorNumber);
+	}
+	
+	@Override
+	public long getCurrentOccupancyByFloor(int floorNumber) {
+		return ParkingLotUtil.getCurrentOccupancyByFloor(floorNumber);
 	}
 
 }

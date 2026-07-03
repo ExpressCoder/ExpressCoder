@@ -10,5 +10,6 @@ public class VehicleRequest {
 	private VehicleType vehicleType;
 	private String registrationNo;
 	private LocalDateTime enteredDateTime;
+	private Floor floor;
 
 }

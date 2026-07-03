@@ -1,32 +1,21 @@
 package com.parkinglot.util;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.parkinglot.dto.Floor;
 import com.parkinglot.dto.VehicleType;
 import com.parkinglot.exception.ParkingException;
 
 public class ParkingLotUtil {
 	
-	public static final long TOTAL_AVAILABLE_LOTS = 3;
-	
-	public static final long TOTAL_AVAILABLE_CAR_LOTS = 1;
-	public static final long TOTAL_AVAILABLE_BIKE_LOTS = 2;
+	public static final int TOTAL_FLOORS = 7;
+	public static final int BIKE_FLOORS = 2;
+	public static final int CAR_FLOORS = 5;
+	public static final int MAX_BIKE_CAPACITY_PER_FLOOR = 200;
+	public static final int MAX_CAR_CAPACITY_PER_FLOOR = 50;
 	
 	private static Map<Integer,Double> parkingPriceMap;
-	private static Map<String,Integer> basementMap = new HashMap<>();	
-	
-	private static int MAX_CAPACITY_PER_BASEMENT_B1 = 150;
-	private static int MAX_CAPACITY_PER_BASEMENT_B2 = 175;
-	private static int MAX_CAPACITY_PER_BASEMENT_B3 = 200;
-	private static int MAX_CAPACITY_PER_BASEMENT_B4 = 225;
-	
-	private static int carLotCounter;
-	private static int bikeLotCounter;
-	
-	private static int basementCounter;
-	
 	
 	static {
 		parkingPriceMap = new LinkedHashMap<>();
@@ -36,46 +25,45 @@ public class ParkingLotUtil {
 		parkingPriceMap.put(4, 200.00);
 		parkingPriceMap.put(8, 400.00);
 		parkingPriceMap.put(16, 800.00);
-		
+	}
+	
+	public static long getTotalAvailableLots() {
+		long total = 0;
+		for (Floor floor : Floor.values()) {
+			total += floor.getAvailableCapacity();
+		}
+		return total;
 	}
 	
 	public static long getRemainingLots(VehicleType vehicleType) throws ParkingException {
-		switch(vehicleType.getValue()) {
-		case "CAR" :
-			if(carLotCounter >= TOTAL_AVAILABLE_CAR_LOTS) {
-				throw new ParkingException("Car Parking Full");
+		long total = 0;
+		for (Floor floor : Floor.values()) {
+			if (floor.getVehicleType() == vehicleType) {
+				total += floor.getAvailableCapacity();
 			}
-			break;
-
-		case "BIKE":
-			if(bikeLotCounter >= TOTAL_AVAILABLE_BIKE_LOTS) {
-				throw new ParkingException("Bike Parking Full");
-			}
-			break;
 		}
-		return incrementLotCounter(vehicleType);
+		
+		if (total == 0) {
+			throw new ParkingException(vehicleType.getValue() + " Parking Full");
+		}
+		
+		return total;
 	}
 	
-	private static long incrementLotCounter(VehicleType vehicleType){
-		switch(vehicleType.getValue()) {
-		case "CAR":
-			return ++carLotCounter;
-			
-		case "BIKE":
-			return ++bikeLotCounter;
+	public static Floor getAvailableFloor(VehicleType vehicleType) throws ParkingException {
+		Floor floor = Floor.getAvailableFloor(vehicleType);
+		if (floor == null) {
+			throw new ParkingException(vehicleType.getValue() + " Parking Full - No available floors");
 		}
-		return 0;
+		return floor;
 	}
 	
-	public static long decrementLotCounter(VehicleType vehicleType) throws ParkingException {
-		switch(vehicleType.getValue()) {
-		case "CAR":
-			return --carLotCounter;
-			
-		case "BIKE":
-			return --bikeLotCounter;
-		}
-		return 0;
+	public static void incrementFloorOccupancy(Floor floor) {
+		floor.incrementOccupancy();
+	}
+	
+	public static void decrementFloorOccupancy(Floor floor) {
+		floor.decrementOccupancy();
 	}
 
 	public static Double getParkingPrice(long hoursDifference) {
@@ -87,41 +75,13 @@ public class ParkingLotUtil {
 		return null;
 	}
 	
-	public static String getAvailableBasement() {
-		
-		
-		int maxCountB1 = basementMap.get("B1");
-		if(maxCountB1 == MAX_CAPACITY_PER_BASEMENT_B1) {
-			int maxCountB2 = basementMap.get("B2");
-			if(maxCountB2 == MAX_CAPACITY_PER_BASEMENT_B1) {
-				int maxCountB3 = basementMap.get("B3");
-			}
-		}
-		
-		for(Map.Entry<String, Integer> availBase : basementMap.entrySet()) {
-		
-				
-				basementCounter = MAX_CAPACITY_PER_BASEMENT_B1;
-				
-				
-				if(basementCounter ==0) {
-					
-				}
-				
-				
-				
-
-			}
-		return null;
+	public static long getAvailableCapacityByFloor(int floorNumber) {
+		Floor floor = Floor.getFloorByNumber(floorNumber);
+		return floor != null ? floor.getAvailableCapacity() : 0;
 	}
-
-private static String getBasementNumber() {
-	while(basementCounter == 0) {
-		
-	}
-	return null;
-}
 	
-
-
+	public static long getCurrentOccupancyByFloor(int floorNumber) {
+		Floor floor = Floor.getFloorByNumber(floorNumber);
+		return floor != null ? floor.getCurrentOccupancy() : 0;
+	}
 }

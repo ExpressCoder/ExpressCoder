@@ -53,5 +53,14 @@ public class ParkingLotController {
 		return new ResponseEntity<>(parkingLotService.getVehiclesFromLot(),HttpStatus.OK);
 	}
 	
+	@GetMapping("/floor/{floorNumber}/availableCapacity")
+	public ResponseEntity<Long> getAvailableCapacityByFloor(@PathVariable("floorNumber") int floorNumber) {
+		return new ResponseEntity<>(parkingLotService.getAvailableCapacityByFloor(floorNumber), HttpStatus.OK);
+	}
+	
+	@GetMapping("/floor/{floorNumber}/currentOccupancy")
+	public ResponseEntity<Long> getCurrentOccupancyByFloor(@PathVariable("floorNumber") int floorNumber) {
+		return new ResponseEntity<>(parkingLotService.getCurrentOccupancyByFloor(floorNumber), HttpStatus.OK);
+	}
 	
 }
