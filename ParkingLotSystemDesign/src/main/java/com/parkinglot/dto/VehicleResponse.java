@@ -15,6 +15,7 @@ public class VehicleResponse {
 	private LocalDateTime enteredTime;
 	private String tokenId;
 	private String basementNo;
+	private Floor floor;
 	
 	private Double price;
 	private LocalDateTime exitTime;

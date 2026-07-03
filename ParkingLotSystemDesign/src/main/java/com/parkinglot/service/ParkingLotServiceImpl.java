@@ -57,6 +57,7 @@ public class ParkingLotServiceImpl implements ParkingLotService {
 			vehicleResponse.setRegistrationNo(vehicleRequest.getRegistrationNo());
 			vehicleResponse.setTokenId(UUID.randomUUID().toString());
 			vehicleResponse.setBasementNo("Vehicle Parked in Floor " + availableFloor.getFloorNumber());
+			vehicleResponse.setFloor(availableFloor);
 			return vehicleResponse;
 		}
 		return null;
