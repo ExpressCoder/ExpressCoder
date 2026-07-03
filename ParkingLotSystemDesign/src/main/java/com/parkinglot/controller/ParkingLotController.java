@@ -1,6 +1,7 @@
 package com.parkinglot.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -52,6 +53,10 @@ public class ParkingLotController {
 	public ResponseEntity<List<VehicleRequest>> getVehiclesFromLot() {
 		return new ResponseEntity<>(parkingLotService.getVehiclesFromLot(),HttpStatus.OK);
 	}
-	
-	
+
+	@GetMapping("/basementStatus")
+	public ResponseEntity<List<Map<String, Object>>> getBasementStatus() {
+		return new ResponseEntity<>(parkingLotService.getBasementStatus(), HttpStatus.OK);
+	}
+
 }

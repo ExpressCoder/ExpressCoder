@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -42,6 +41,7 @@ public class ParkingLotServiceImpl implements ParkingLotService {
 		if(vehicleDetails.get(vehicleRequest.getRegistrationNo()) != null)
 			throw new ParkingException("Vehicle Already in Parking Lot:"+vehicleRequest.getRegistrationNo());
 		if(getRemainingLots(vehicleRequest.getVehicleType()) > 0) {
+			ParkingLotUtil.incrementLotCounter(vehicleRequest.getVehicleType());
 			LocalDateTime enteredTime = LocalDateTime.now();
 			vehicleRequest.setEnteredDateTime(enteredTime);
 			vehicleDetails.put(vehicleRequest.getRegistrationNo(), vehicleRequest);
@@ -53,7 +53,7 @@ public class ParkingLotServiceImpl implements ParkingLotService {
 			vehicleResponse.setBasementNo("Vehicle Parked in "+ParkingLotUtil.getAvailableBasement());
 			return vehicleResponse;
 		}
-		return null;
+		throw new ParkingException("No parking lots available for: " + vehicleRequest.getVehicleType().getValue());
 	}
 
 	@Override
@@ -63,9 +63,8 @@ public class ParkingLotServiceImpl implements ParkingLotService {
 			VehicleRequest vehicleRequest = vehicleDetails.get(registrationNo);
 
 			LocalDateTime exitTime = LocalDateTime.now();
-			long hoursDifference = ChronoUnit.HOURS.between(exitTime, vehicleRequest.getEnteredDateTime());
-			hoursDifference = 1;
-			Double price = ParkingLotUtil.getParkingPrice(hoursDifference);
+			long hoursDifference = ChronoUnit.HOURS.between(vehicleRequest.getEnteredDateTime(), exitTime);
+			double price = ParkingLotUtil.getParkingPrice(hoursDifference);
 			ParkingLotUtil.decrementLotCounter(vehicleRequest.getVehicleType());
 			vehicleResponse = new VehicleResponse();
 			vehicleResponse.setEnteredTime(vehicleRequest.getEnteredDateTime());
@@ -85,6 +84,11 @@ public class ParkingLotServiceImpl implements ParkingLotService {
 	@Override
 	public List<VehicleRequest> getVehiclesFromLot() {
 		return vehicleDetails.entrySet().stream().map(e->e.getValue()).collect(Collectors.toList());
+	}
+
+	@Override
+	public List<Map<String, Object>> getBasementStatus() {
+		return ParkingLotUtil.getBasementStatus();
 	}
 
 }

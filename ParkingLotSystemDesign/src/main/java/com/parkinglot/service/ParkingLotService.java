@@ -1,6 +1,7 @@
 package com.parkinglot.service;
 
 import java.util.List;
+import java.util.Map;
 
 import com.parkinglot.dto.VehicleRequest;
 import com.parkinglot.dto.VehicleResponse;
@@ -18,5 +19,7 @@ public interface ParkingLotService {
 	long getRemainingLots(VehicleType vehicleType) throws ParkingException;
 	
 	List<VehicleRequest> getVehiclesFromLot();
+
+	List<Map<String, Object>> getBasementStatus();
 
 }
