@@ -1,0 +1,19 @@
+version: '3.8'
+services:
+  db:
+    image: mysql:8.0
+    container_name: parkinglot-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: parking
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_USER: parking_user
+      MYSQL_PASSWORD: parking_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./docker/mysql-init:/docker-entrypoint-initdb.d
+      - db_data:/var/lib/mysql
+
+volumes:
+  db_data:
