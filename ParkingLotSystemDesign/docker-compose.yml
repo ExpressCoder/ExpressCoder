@@ -33,6 +33,7 @@ services:
       - "3000:3000"
     volumes:
       - ./docker/grafana/provisioning:/etc/grafana/provisioning
+      - ./docker/grafana/dashboards:/var/lib/grafana/dashboards
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     restart: unless-stopped
