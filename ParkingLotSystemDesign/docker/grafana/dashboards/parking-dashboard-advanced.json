@@ -1,0 +1,83 @@
+{
+  "uid": "parking-metrics-advanced",
+  "title": "Parking Lot - Advanced Metrics",
+  "timezone": "browser",
+  "schemaVersion": 36,
+  "version": 1,
+  "panels": [
+    {
+      "id": 1,
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 6 },
+      "type": "graph",
+      "title": "HTTP Requests (requests/sec)",
+      "targets": [
+        { "expr": "sum(rate(http_server_requests_seconds_count[1m]))", "legendFormat": "req/s", "refId": "A" }
+      ]
+    },
+    {
+      "id": 2,
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 6 },
+      "type": "graph",
+      "title": "HTTP 95th Percentile Latency (ms)",
+      "targets": [
+        { "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket[5m])) by (le)) * 1000", "legendFormat": "p95 (ms)", "refId": "A" }
+      ]
+    },
+    {
+      "id": 3,
+      "gridPos": { "x": 0, "y": 6, "w": 12, "h": 6 },
+      "type": "graph",
+      "title": "HTTP Error Rate (5xx req/s)",
+      "targets": [
+        { "expr": "sum(rate(http_server_requests_seconds_count{status=~\"5..\"}[1m]))", "legendFormat": "5xx/s", "refId": "A" }
+      ]
+    },
+    {
+      "id": 4,
+      "gridPos": { "x": 12, "y": 6, "w": 12, "h": 6 },
+      "type": "graph",
+      "title": "JVM Heap Used (MB)",
+      "targets": [
+        { "expr": "jvm_memory_used_bytes{area=\"heap\"} / 1024 / 1024", "legendFormat": "heap (MB)", "refId": "A" }
+      ]
+    },
+    {
+      "id": 5,
+      "gridPos": { "x": 0, "y": 12, "w": 12, "h": 6 },
+      "type": "graph",
+      "title": "JVM Live Threads",
+      "targets": [
+        { "expr": "jvm_threads_live_threads", "legendFormat": "threads", "refId": "A" }
+      ]
+    },
+    {
+      "id": 6,
+      "gridPos": { "x": 12, "y": 12, "w": 12, "h": 6 },
+      "type": "graph",
+      "title": "GC Pause Rate (s/sec)",
+      "targets": [
+        { "expr": "rate(jvm_gc_pause_seconds_sum[1m])", "legendFormat": "gc pause/s", "refId": "A" }
+      ]
+    },
+    {
+      "id": 7,
+      "gridPos": { "x": 0, "y": 18, "w": 12, "h": 6 },
+      "type": "graph",
+      "title": "DB Pool - Active Connections",
+      "targets": [
+        { "expr": "sum(hikaricp_connections_active) or sum(hikaricp_active_connections) or sum(hikaricp_connections)", "legendFormat": "active conns", "refId": "A" }
+      ]
+    },
+    {
+      "id": 8,
+      "gridPos": { "x": 12, "y": 18, "w": 12, "h": 6 },
+      "type": "gauge",
+      "title": "DB Pool Usage (%)",
+      "targets": [
+        { "expr": "(sum(hikaricp_connections_active) or sum(hikaricp_active_connections) or sum(hikaricp_connections)) / (sum(hikaricp_max_connections) or 1) * 100", "legendFormat": "pool %", "refId": "A" }
+      ]
+    }
+  ],
+  "templating": { "list": [] },
+  "annotations": { "list": [] }
+}
