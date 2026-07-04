@@ -3,18 +3,26 @@ package com.parkinglot.service;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.lang.reflect.Field;
-import java.time.LocalDateTime;
-import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import com.parkinglot.dto.VehicleRequest;
 import com.parkinglot.dto.VehicleResponse;
 import com.parkinglot.dto.VehicleType;
 import com.parkinglot.dto.Floor;
+import com.parkinglot.repository.VehicleRepository;
 
+@SpringBootTest
 public class ParkingLotServiceImplTest {
+
+    @Autowired
+    ParkingLotServiceImpl service;
+
+    @Autowired
+    VehicleRepository vehicleRepository;
 
     @BeforeEach
     void resetState() throws Exception {
@@ -25,22 +33,15 @@ public class ParkingLotServiceImplTest {
             f.setInt(floor, 0);
         }
 
-        // clear vehicleDetails map in service
-        Field vd = ParkingLotServiceImpl.class.getDeclaredField("vehicleDetails");
-        vd.setAccessible(true);
-        @SuppressWarnings("unchecked")
-        Map<String, VehicleRequest> map = (Map<String, VehicleRequest>) vd.get(null);
-        map.clear();
+        // clear persisted vehicles
+        vehicleRepository.deleteAll();
     }
 
     @Test
     void testEnterAndExit() throws Exception {
-        ParkingLotServiceImpl service = new ParkingLotServiceImpl();
-
         VehicleRequest req = new VehicleRequest();
         req.setRegistrationNo("TEST-123");
         req.setVehicleType(VehicleType.CAR);
-        req.setEnteredDateTime(LocalDateTime.now());
 
         VehicleResponse enterResp = service.enterToParkingLot(req);
         assertNotNull(enterResp);
